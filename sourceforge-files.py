@@ -111,10 +111,8 @@ data.sort(
 )
 
 total_downloads = 0
-total_weekly_downloads = 0
 
 print('\t'.join([
-    '#Down',
     '#Weekly',
     '   Date   ',
     '   File   ',
@@ -124,29 +122,37 @@ for row in data:
     if not row['filename']:
         continue
     parts = []
+    downloads = None
+    w_downloads = None
     try:
         downloads = int(row['downloads'])
-    except ValueError:
-        parts.append('  -')
-    else:
-        total_downloads += downloads
-        parts.append('%3d'%downloads)
+    except (KeyError, ValueError):
+        pass
     try:
         w_downloads = int(row['weekly_downloads'])
     except KeyError:
-        parts.append('  -')
+        pass
+    
+    if downloads is None:
+        downloads = w_downloads
     else:
-        total_weekly_downloads += w_downloads
-        parts.append('%3d'%w_downloads)
+        if w_downloads is not None:
+            assert downloads == w_downloads ## FIXME
+
+    if downloads is None:
+        downloads_str = '  -'
+    else:
+        downloads_str = '%3s'%downloads
+        total_downloads += downloads
     parts += [
+        downloads_str,
         row['date'],
         row['filename'],
     ]
     print('\t'.join(parts))
 
 if total_downloads > 0:
-    print('%3d\t%3d\tTotal'%(
+    print('%3d\tTotal'%(
         total_downloads,
-        total_weekly_downloads,
     ))
 
